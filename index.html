@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>NextBreak</title>
+<meta name="description" content="NextBreak: ספירה לאחור חיה לחופש ולחגים. בוחרים אירוע או תאריך משלכם, והשעון מתחיל.">
+<meta name="theme-color" content="#0F1115">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 48 48'%3E%3Crect width='48' height='48' rx='10' fill='%230F1115'/%3E%3Ccircle cx='24' cy='20' r='9' fill='none' stroke='%23FF7A59' stroke-width='3'/%3E%3Cpath d='M8 36 Q16 31 24 36 T40 36' fill='none' stroke='%23FF7A59' stroke-width='3' stroke-linecap='round'/%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;700&family=Suez+One&family=Rubik:wght@400;500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<div id="app">
+
+  <!-- ============ SELECTION SCREEN ============ -->
+  <section id="view-select" class="view" aria-labelledby="wordmark">
+
+    <header class="hero">
+      <h1 id="wordmark"><span dir="ltr" lang="en">NextBreak</span></h1>
+      <p class="subhead">ספירה לאחור חיה לחופש ולחגים. בוחרים אירוע, והשעון מתחיל.</p>
+    </header>
+
+    <h2 class="section-label">בחרו מה סופרים אליו</h2>
+
+    <div class="card-grid" id="fixed-cards"></div>
+
+    <section id="my-events-section" hidden>
+      <h2 class="section-label">האירועים שלי</h2>
+      <div class="card-grid" id="my-events-cards"></div>
+    </section>
+
+    <div class="custom-panel">
+      <h3 class="custom-title">תאריך משלי</h3>
+      <form id="custom-form" novalidate>
+        <div class="field">
+          <label for="custom-date">לאיזה תאריך סופרים?</label>
+          <input type="date" id="custom-date" name="custom-date" dir="auto" required>
+        </div>
+        <div class="field">
+          <label for="custom-label">איך קוראים לספירה הזו?</label>
+          <input type="text" id="custom-label" name="custom-label" dir="auto" placeholder="לדוגמה: יום הולדת, טיול, מבחן...">
+        </div>
+        <button type="submit" class="btn-primary">התחילו לספור</button>
+      </form>
+    </div>
+
+    <footer class="site-footer">
+      <span dir="ltr" lang="en">NextBreak</span> · בלי הרשמה. האירועים שאתם שומרים נשארים רק בדפדפן שלכם, לא על שרת.
+    </footer>
+
+  </section>
+
+  <!-- ============ COUNTDOWN SCREEN ============ -->
+  <section id="view-countdown" class="view" hidden aria-labelledby="event-name">
+
+    <div class="countdown-live">
+      <h1 id="event-name" class="event-banner"></h1>
+
+      <div class="number-grid">
+        <div class="number-block" data-unit="days">
+          <span class="number" id="num-days">00</span>
+          <span class="unit-label">ימים</span>
+        </div>
+        <div class="number-block" data-unit="hours">
+          <span class="number" id="num-hours">00</span>
+          <span class="unit-label">שעות</span>
+        </div>
+        <div class="number-block" data-unit="minutes">
+          <span class="number" id="num-minutes">00</span>
+          <span class="unit-label">דקות</span>
+        </div>
+        <div class="number-block" data-unit="seconds">
+          <span class="number" id="num-seconds">00</span>
+          <span class="unit-label">שניות</span>
+        </div>
+      </div>
+
+      <div class="countdown-actions">
+        <button type="button" id="btn-change-event" class="btn-secondary">שנו אירוע</button>
+        <button type="button" id="btn-share" class="btn-secondary" hidden>העתיקו קישור</button>
+      </div>
+      <p id="share-confirm" class="share-confirm" hidden>הקישור הועתק. שלחו לחברים!</p>
+    </div>
+
+    <div class="arrival-state" id="arrival-state" hidden>
+      <div class="confetti" id="confetti" aria-hidden="true"></div>
+      <h1 class="arrival-headline">הגיע הזמן! 🎉</h1>
+      <p id="arrival-sub" class="arrival-sub"></p>
+      <button type="button" id="btn-restart" class="btn-secondary">התחילו ספירה חדשה</button>
+    </div>
+
+  </section>
+
+</div>
+
+<script src="script.js"></script>
+</body>
+</html>

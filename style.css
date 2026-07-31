@@ -1,0 +1,440 @@
+:root {
+  color-scheme: dark;
+  --color-bg: #0F1115;
+  --color-surface: #1A1D24;
+  --color-surface-hover: #22262f;
+  --color-text: #E8E9ED;
+  --color-muted: #8B92A3;
+  --color-accent: #FF7A59;
+
+  --font-display: 'Suez One', serif;
+  --font-body: 'Rubik', sans-serif;
+  --font-numeral: 'Space Grotesk', sans-serif;
+
+  --space-1: 8px;
+  --space-2: 16px;
+  --space-3: 24px;
+  --space-4: 32px;
+  --space-6: 48px;
+  --space-8: 64px;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html, body {
+  margin: 0;
+  padding: 0;
+  background: var(--color-bg);
+  color: var(--color-text);
+}
+
+body {
+  font-family: var(--font-body);
+  font-weight: 400;
+  line-height: 1.7;
+  letter-spacing: 0;
+  min-height: 100vh;
+  display: flex;
+  justify-content: center;
+}
+
+#app {
+  width: 100%;
+  max-width: 560px;
+  padding: var(--space-4) var(--space-2) var(--space-8);
+}
+
+.view {
+  animation: fadeIn 250ms ease-in-out;
+}
+
+.view[hidden] {
+  display: none;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+.view.fading-out {
+  opacity: 0;
+  transition: opacity 250ms ease-in-out;
+}
+
+/* ---------- Selection screen ---------- */
+
+.hero {
+  text-align: center;
+  margin-bottom: var(--space-4);
+}
+
+#wordmark {
+  font-family: var(--font-numeral);
+  font-weight: 700;
+  font-size: 44px;
+  color: var(--color-accent);
+  margin: 0 0 var(--space-1);
+}
+
+.subhead {
+  font-family: var(--font-body);
+  font-size: 17px;
+  color: var(--color-text);
+  margin: 0;
+}
+
+.section-label {
+  font-family: var(--font-display);
+  font-weight: 400;
+  font-size: 20px;
+  margin: 0 0 var(--space-2);
+  text-align: center;
+}
+
+.card-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: var(--space-2);
+  margin-bottom: var(--space-3);
+}
+
+@media (min-width: 720px) {
+  .card-grid {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+.event-card {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  width: 100%;
+  min-height: 56px;
+  padding: var(--space-2);
+  background: var(--color-surface);
+  border: 1px solid transparent;
+  border-radius: 12px;
+  color: inherit;
+  font: inherit;
+  text-align: start;
+  cursor: pointer;
+  transition: transform 120ms ease-out, border-color 150ms ease-out, background 150ms ease-out;
+  position: relative;
+}
+
+#my-events-section {
+  margin-bottom: var(--space-3);
+}
+
+.saved-card {
+  padding-inline-start: var(--space-8);
+}
+
+.delete-btn {
+  position: absolute;
+  inset-inline-start: 6px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  border: none;
+  background: transparent;
+  color: var(--color-muted);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: color 150ms ease-out, background 150ms ease-out;
+}
+
+.delete-btn:hover,
+.delete-btn:focus-visible {
+  color: var(--color-accent);
+  background: var(--color-surface-hover);
+  outline: none;
+}
+
+.delete-btn svg {
+  width: 16px;
+  height: 16px;
+}
+
+.event-card:hover,
+.event-card:focus-visible {
+  background: var(--color-surface-hover);
+  border-color: var(--color-accent);
+  outline: none;
+}
+
+.event-card:active {
+  transform: scale(0.97);
+}
+
+.event-icon {
+  flex: 0 0 auto;
+  width: 40px;
+  height: 40px;
+  color: var(--color-accent);
+}
+
+.event-icon svg {
+  width: 100%;
+  height: 100%;
+}
+
+.event-text {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.event-name {
+  font-family: var(--font-display);
+  font-size: 20px;
+}
+
+.event-date {
+  font-family: var(--font-body);
+  font-size: 14px;
+  color: var(--color-muted);
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.custom-panel {
+  background: var(--color-surface);
+  border-radius: 12px;
+  padding: var(--space-3);
+  margin-bottom: var(--space-3);
+}
+
+.custom-title {
+  font-family: var(--font-display);
+  font-size: 20px;
+  margin: 0 0 var(--space-2);
+}
+
+.field {
+  margin-bottom: var(--space-2);
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.field label {
+  font-size: 14px;
+  color: var(--color-muted);
+}
+
+.field input {
+  font: inherit;
+  font-family: var(--font-body);
+  background: var(--color-bg);
+  color: var(--color-text);
+  border: 1px solid var(--color-muted);
+  border-radius: 8px;
+  padding: 12px;
+  min-height: 44px;
+}
+
+.field input:focus-visible {
+  outline: 2px solid var(--color-accent);
+  outline-offset: 1px;
+}
+
+.btn-primary,
+.btn-secondary {
+  font: inherit;
+  font-family: var(--font-body);
+  font-weight: 500;
+  border-radius: 8px;
+  min-height: 44px;
+  padding: 12px 20px;
+  cursor: pointer;
+  transition: transform 120ms ease-out, border-color 150ms ease-out;
+}
+
+.btn-primary {
+  width: 100%;
+  background: var(--color-accent);
+  color: #1A0E0A;
+  border: 1px solid var(--color-accent);
+  font-weight: 700;
+}
+
+.btn-primary:active,
+.btn-secondary:active {
+  transform: scale(0.97);
+}
+
+.btn-secondary {
+  background: var(--color-surface);
+  color: var(--color-text);
+  border: 1px solid var(--color-muted);
+}
+
+.btn-secondary:hover,
+.btn-secondary:focus-visible {
+  border-color: var(--color-accent);
+  outline: none;
+}
+
+.site-footer {
+  text-align: center;
+  font-size: 13px;
+  color: var(--color-muted);
+}
+
+/* ---------- Countdown screen ---------- */
+
+.countdown-live {
+  text-align: center;
+}
+
+.event-banner {
+  font-family: var(--font-display);
+  font-weight: 400;
+  font-size: 30px;
+  color: var(--color-accent);
+  margin: var(--space-2) 0 4px;
+  animation: bannerGlow 300ms ease-out;
+}
+
+@keyframes bannerGlow {
+  from { text-shadow: 0 0 24px var(--color-accent); opacity: 0; }
+  to { text-shadow: 0 0 0 transparent; opacity: 1; }
+}
+
+.number-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: var(--space-2);
+  margin-bottom: var(--space-3);
+}
+
+@media (min-width: 720px) {
+  .number-grid {
+    grid-template-columns: repeat(4, 1fr);
+    gap: var(--space-2);
+  }
+}
+
+.number-block {
+  background: var(--color-surface);
+  border-radius: 12px;
+  padding: var(--space-2) var(--space-1);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+}
+
+.number {
+  font-family: var(--font-numeral);
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  font-size: 44px;
+  color: var(--color-accent);
+  direction: ltr;
+}
+
+@media (min-width: 720px) {
+  .number { font-size: 64px; }
+}
+
+.unit-label {
+  font-family: var(--font-body);
+  font-size: 14px;
+  color: var(--color-muted);
+}
+
+.number-block.pulse-tick .number {
+  animation: pulseTick 100ms ease-out;
+}
+
+@keyframes pulseTick {
+  from { opacity: 0.85; }
+  to { opacity: 1; }
+}
+
+.number-block.pulse-roll {
+  animation: pulseRoll 300ms ease-out;
+}
+
+@keyframes pulseRoll {
+  0% { transform: scale(1); }
+  50% { transform: scale(1.06); }
+  100% { transform: scale(1); }
+}
+
+.countdown-actions {
+  display: flex;
+  justify-content: center;
+  gap: var(--space-2);
+  flex-wrap: wrap;
+}
+
+.share-confirm {
+  font-size: 14px;
+  color: var(--color-accent);
+  margin-top: var(--space-1);
+}
+
+/* ---------- Arrival state ---------- */
+
+.arrival-state {
+  position: relative;
+  text-align: center;
+  padding: var(--space-6) 0;
+}
+
+.arrival-headline {
+  font-family: var(--font-display);
+  font-size: 34px;
+  color: var(--color-accent);
+  margin: 0 0 var(--space-1);
+}
+
+.arrival-sub {
+  font-size: 17px;
+  margin: 0 0 var(--space-3);
+}
+
+.confetti {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  overflow: hidden;
+}
+
+.confetti-piece {
+  position: absolute;
+  top: 20%;
+  width: 8px;
+  height: 8px;
+  border-radius: 2px;
+  background: var(--color-accent);
+  opacity: 0;
+  animation: confettiBurst 700ms ease-out forwards;
+}
+
+@keyframes confettiBurst {
+  0% { opacity: 0; transform: translateY(0) rotate(0deg) scale(0.6); }
+  15% { opacity: 1; }
+  100% { opacity: 0; transform: translateY(140px) rotate(280deg) scale(1); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .view,
+  .event-banner,
+  .number-block.pulse-tick .number,
+  .number-block.pulse-roll,
+  .confetti-piece {
+    animation: none !important;
+  }
+}
