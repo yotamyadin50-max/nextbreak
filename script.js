@@ -83,6 +83,35 @@
     return new Date(parts[0], parts[1] - 1, parts[2], 0, 0, 0, 0);
   }
 
+  function startOfDay(d) {
+    return new Date(d.getFullYear(), d.getMonth(), d.getDate(), 0, 0, 0, 0);
+  }
+
+  // For a recurring (birthday-type) saved event, the stored date's month/day
+  // repeats every year. Always resolve to the next upcoming occurrence, this
+  // year if it hasn't happened yet, otherwise next year, so the event never
+  // needs re-entering and never permanently "expires."
+  function effectiveDate(saved) {
+    var stored = parseDateOnly(saved.date);
+    if (!saved.recurring) return stored;
+    var today = startOfDay(new Date());
+    var candidate = new Date(today.getFullYear(), stored.getMonth(), stored.getDate(), 0, 0, 0, 0);
+    if (candidate.getTime() < today.getTime()) {
+      candidate = new Date(today.getFullYear() + 1, stored.getMonth(), stored.getDate(), 0, 0, 0, 0);
+    }
+    return candidate;
+  }
+
+  function formatDateObjDMY(d) {
+    return d.getDate() + '.' + (d.getMonth() + 1) + '.' + d.getFullYear();
+  }
+
+  function dateToISO(d) {
+    var m = String(d.getMonth() + 1).padStart(2, '0');
+    var day = String(d.getDate()).padStart(2, '0');
+    return d.getFullYear() + '-' + m + '-' + day;
+  }
+
   // ---------- Saved custom events (localStorage) ----------
 
   function loadSavedEvents() {
@@ -100,10 +129,10 @@
     } catch (e) { /* storage unavailable, fail silently, the app still works without persistence */ }
   }
 
-  function addSavedEvent(label, date) {
+  function addSavedEvent(label, date, recurring) {
     var list = loadSavedEvents();
     var id = 'c' + Date.now();
-    list.push({ id: id, label: label, date: date });
+    list.push({ id: id, label: label, date: date, recurring: !!recurring });
     saveSavedEvents(list);
     return id;
   }
@@ -141,10 +170,12 @@
     var btn = document.createElement('button');
     btn.type = 'button';
     btn.className = 'event-card saved-card';
+    var effective = effectiveDate(saved);
     var params = new URLSearchParams();
     params.set('date', saved.date);
     params.set('label', saved.label);
     params.set('id', saved.id);
+    var recurringTag = saved.recurring ? '<span class="tag-recurring">חוזר כל שנה</span>' : '';
     btn.innerHTML =
       '<button type="button" class="delete-btn" aria-label="הסירו את ' + saved.label + '">' +
         '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="6" y1="6" x2="18" y2="18"/><line x1="18" y1="6" x2="6" y2="18"/></svg>' +
@@ -152,7 +183,7 @@
       '<span class="event-icon" aria-hidden="true">' + buildIconSvg('sun') + '</span>' +
       '<span class="event-text">' +
         '<span class="event-name">' + saved.label + '</span>' +
-        '<span class="event-date"><span dir="ltr">' + formatDateDMY(saved.date) + '</span></span>' +
+        '<span class="event-date"><span dir="ltr">' + formatDateObjDMY(effective) + '</span> ' + recurringTag + '</span>' +
       '</span>';
     btn.addEventListener('click', function () {
       goTo('countdown/custom?' + params.toString());
@@ -193,6 +224,19 @@
       var qIndex = hash.indexOf('?');
       var params = new URLSearchParams(qIndex >= 0 ? hash.slice(qIndex + 1) : '');
       var date = params.get('date');
+      var savedId = params.get('id');
+      if (savedId) {
+        var savedMatch = loadSavedEvents().filter(function (ev) { return ev.id === savedId; })[0];
+        if (savedMatch) {
+          return {
+            view: 'countdown',
+            type: 'custom',
+            date: dateToISO(effectiveDate(savedMatch)),
+            label: savedMatch.label,
+            recurring: !!savedMatch.recurring
+          };
+        }
+      }
       if (date) {
         return {
           view: 'countdown',
@@ -356,13 +400,15 @@
     var date = document.getElementById('custom-date').value;
     if (!date) return;
     var label = document.getElementById('custom-label').value.trim() || 'הספירה שלי';
-    var id = addSavedEvent(label, date);
+    var recurring = document.getElementById('custom-recurring').checked;
+    var id = addSavedEvent(label, date, recurring);
     var params = new URLSearchParams();
     params.set('date', date);
     params.set('label', label);
     params.set('id', id);
     document.getElementById('custom-date').value = '';
     document.getElementById('custom-label').value = '';
+    document.getElementById('custom-recurring').checked = false;
     goTo('countdown/custom?' + params.toString());
   });
 
@@ -399,8 +445,121 @@
     done();
   }
 
+  // ---------- PWA install prompt ----------
+
+  var btnInstall = document.getElementById('btn-install');
+  var deferredInstallPrompt = null;
+
+  window.addEventListener('beforeinstallprompt', function (e) {
+    e.preventDefault();
+    deferredInstallPrompt = e;
+    btnInstall.hidden = false;
+  });
+
+  btnInstall.addEventListener('click', function () {
+    if (!deferredInstallPrompt) return;
+    deferredInstallPrompt.prompt();
+    deferredInstallPrompt.userChoice.then(function () {
+      deferredInstallPrompt = null;
+      btnInstall.hidden = true;
+    });
+  });
+
+  window.addEventListener('appinstalled', function () {
+    btnInstall.hidden = true;
+  });
+
+  // ---------- Notifications (best-effort, no server) ----------
+  // A static site with no backend cannot wake itself up on a schedule while
+  // fully closed, real push needs a server. This checks, whenever the tab is
+  // open or becomes visible, whether a reminder window has started (10:00 the
+  // day before, 08:00 the day of) and fires it once per event per year.
+
+  var btnNotify = document.getElementById('btn-notify');
+  var NOTIFIED_KEY = 'nextbreak_notified';
+  var notifSupported = 'Notification' in window && 'serviceWorker' in navigator;
+
+  function loadNotified() {
+    try {
+      var raw = localStorage.getItem(NOTIFIED_KEY);
+      return raw ? JSON.parse(raw) : {};
+    } catch (e) { return {}; }
+  }
+
+  function markNotified(key) {
+    var map = loadNotified();
+    map[key] = true;
+    try { localStorage.setItem(NOTIFIED_KEY, JSON.stringify(map)); } catch (e) { /* no-op */ }
+  }
+
+  function sendNotification(title, body, tag) {
+    navigator.serviceWorker.ready.then(function (reg) {
+      reg.active && reg.active.postMessage({ type: 'show-notification', payload: { title: title, body: body, tag: tag } });
+    });
+  }
+
+  function updateNotifyButton() {
+    if (!notifSupported) { btnNotify.hidden = true; return; }
+    btnNotify.hidden = false;
+    if (Notification.permission === 'granted') {
+      btnNotify.textContent = 'התראות פעילות';
+      btnNotify.classList.add('is-active');
+    } else {
+      btnNotify.textContent = 'הפעילו התראות';
+      btnNotify.classList.remove('is-active');
+    }
+  }
+
+  btnNotify.addEventListener('click', function () {
+    if (Notification.permission === 'granted' || Notification.permission === 'denied') return;
+    Notification.requestPermission().then(updateNotifyButton);
+  });
+
+  function checkReminders() {
+    if (!notifSupported || Notification.permission !== 'granted') return;
+    var today = startOfDay(new Date());
+    var hour = new Date().getHours();
+    var notified = loadNotified();
+    var toMark = [];
+
+    function check(key, name, target) {
+      var year = target.getFullYear();
+      var dayMs = 24 * 60 * 60 * 1000;
+      var diffDays = Math.round((target.getTime() - today.getTime()) / dayMs);
+      var beforeKey = key + '_before_' + year;
+      var ofKey = key + '_of_' + year;
+      if (diffDays === 1 && hour >= 10 && !notified[beforeKey]) {
+        sendNotification('מחר: ' + name, name + ' מגיע מחר. תפתחו את NextBreak לספירה החיה.', beforeKey);
+        toMark.push(beforeKey);
+      }
+      if (diffDays === 0 && hour >= 8 && !notified[ofKey]) {
+        sendNotification('היום: ' + name + ' 🎉', 'היום זה היום! ' + name + ' כאן.', ofKey);
+        toMark.push(ofKey);
+      }
+    }
+
+    Object.keys(EVENTS).forEach(function (id) {
+      check(id, EVENTS[id].name, parseDateOnly(EVENTS[id].date));
+    });
+    loadSavedEvents().forEach(function (ev) {
+      check(ev.id, ev.label, effectiveDate(ev));
+    });
+
+    toMark.forEach(markNotified);
+  }
+
+  if (notifSupported) {
+    navigator.serviceWorker.register('sw.js').catch(function () { /* offline/unsupported, app still works */ });
+  }
+
   renderFixedCards();
+  updateNotifyButton();
   window.addEventListener('hashchange', render);
   window.addEventListener('DOMContentLoaded', render);
+  document.addEventListener('visibilitychange', function () {
+    if (document.visibilityState === 'visible') checkReminders();
+  });
   render();
+  checkReminders();
+  setInterval(checkReminders, 60000);
 })();

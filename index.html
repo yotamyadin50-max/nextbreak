@@ -6,7 +6,12 @@
 <title>NextBreak</title>
 <meta name="description" content="NextBreak: ספירה לאחור חיה לחופש ולחגים. בוחרים אירוע או תאריך משלכם, והשעון מתחיל.">
 <meta name="theme-color" content="#0F1115">
-<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 48 48'%3E%3Crect width='48' height='48' rx='10' fill='%230F1115'/%3E%3Ccircle cx='24' cy='20' r='9' fill='none' stroke='%23FF7A59' stroke-width='3'/%3E%3Cpath d='M8 36 Q16 31 24 36 T40 36' fill='none' stroke='%23FF7A59' stroke-width='3' stroke-linecap='round'/%3E%3C/svg%3E">
+<link rel="manifest" href="manifest.json">
+<link rel="icon" href="icons/icon-192.png">
+<link rel="apple-touch-icon" href="icons/icon-180.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="NextBreak">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;700&family=Suez+One&family=Rubik:wght@400;500;700&display=swap" rel="stylesheet">
@@ -22,6 +27,10 @@
     <header class="hero">
       <h1 id="wordmark"><span dir="ltr" lang="en">NextBreak</span></h1>
       <p class="subhead">ספירה לאחור חיה לחופש ולחגים. בוחרים אירוע, והשעון מתחיל.</p>
+      <div class="app-actions">
+        <button type="button" id="btn-install" class="btn-chip" hidden>התקינו כאפליקציה</button>
+        <button type="button" id="btn-notify" class="btn-chip" hidden>הפעילו התראות</button>
+      </div>
     </header>
 
     <h2 class="section-label">בחרו מה סופרים אליו</h2>
@@ -43,6 +52,10 @@
         <div class="field">
           <label for="custom-label">איך קוראים לספירה הזו?</label>
           <input type="text" id="custom-label" name="custom-label" dir="auto" placeholder="לדוגמה: יום הולדת, טיול, מבחן...">
+        </div>
+        <div class="field-checkbox">
+          <input type="checkbox" id="custom-recurring">
+          <label for="custom-recurring">יום הולדת (חוזר כל שנה, נשאר עד שמוחקים)</label>
         </div>
         <button type="submit" class="btn-primary">התחילו לספור</button>
       </form>
